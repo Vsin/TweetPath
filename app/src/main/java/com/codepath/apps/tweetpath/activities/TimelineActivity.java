@@ -1,16 +1,21 @@
 package com.codepath.apps.tweetpath.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.codepath.apps.tweetpath.R;
 import com.codepath.apps.tweetpath.TwitterApp;
 import com.codepath.apps.tweetpath.adapters.TweetAdapter;
+import com.codepath.apps.tweetpath.fragments.ComposeFragment;
 import com.codepath.apps.tweetpath.listeners.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.tweetpath.models.Tweet;
 import com.codepath.apps.tweetpath.utils.TwitterClient;
@@ -26,7 +31,7 @@ import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
-public class TimelineActivity extends AppCompatActivity {
+public class TimelineActivity extends AppCompatActivity implements ComposeFragment.OnTweetSubmitListener {
 
     LinearLayoutManager mLinearLayoutManager;
     private TwitterClient mClient;
@@ -34,6 +39,34 @@ public class TimelineActivity extends AppCompatActivity {
     private List<Tweet> mTweets;
     private RecyclerView mRvTweets;
     private ConnectivityManager mConnectivityManager;
+
+    @Override
+    public void submitTweet(String text) {
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_timeline, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_compose) {
+            launchComposeActivity();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void launchComposeActivity() {
+        FragmentManager fm = getSupportFragmentManager();
+        ComposeFragment composeFragment = ComposeFragment.newInstance();
+        composeFragment.show(fm, "compose");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
