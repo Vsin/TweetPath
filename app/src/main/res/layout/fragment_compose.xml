@@ -1,18 +1,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.codepath.apps.tweetpath.fragments.ComposeFragment">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context="com.codepath.apps.tweetpath.fragments.ComposeFragment"
+    android:background="@color/white">
 
     <ImageView
         android:id="@+id/ivProfileIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         app:srcCompat="@drawable/ic_launcher"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="5dp"
+        android:scaleType="centerCrop"
         android:contentDescription="@string/profile_icon" />
 
     <ImageButton
@@ -24,7 +26,7 @@
         android:layout_margin="10dp"
         android:background="@android:color/background_light"
         android:contentDescription="@string/cancel_button"
-        android:tint="#00aced"
+        android:tint="@color/twitter_logo_blue"
         app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 
     <EditText
@@ -48,7 +50,7 @@
         android:layout_alignEnd="@+id/etCompose"
         android:layout_alignParentBottom="true"
         android:layout_margin="10dp"
-        android:background="#00aced"
+        android:background="@color/twitter_logo_blue"
         android:text="@string/tweet"
         android:textColor="@android:color/white" />
 

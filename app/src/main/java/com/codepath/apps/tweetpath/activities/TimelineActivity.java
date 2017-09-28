@@ -1,7 +1,6 @@
 package com.codepath.apps.tweetpath.activities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -9,6 +8,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -18,6 +19,7 @@ import com.codepath.apps.tweetpath.adapters.TweetAdapter;
 import com.codepath.apps.tweetpath.fragments.ComposeFragment;
 import com.codepath.apps.tweetpath.listeners.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.tweetpath.models.Tweet;
+import com.codepath.apps.tweetpath.models.User;
 import com.codepath.apps.tweetpath.utils.TwitterClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -39,10 +41,46 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
     private List<Tweet> mTweets;
     private RecyclerView mRvTweets;
     private ConnectivityManager mConnectivityManager;
+    private User currentUser;
 
     @Override
     public void submitTweet(String text) {
+        mClient.postTweet(new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                Tweet tweet;
+                Log.d("Submit Tweet Object: ", String.valueOf(statusCode));
+                try {
+                    tweet = Tweet.fromJSON(response);
+                    mTweets.add(0, tweet);
+                    mTweetAdapter.notifyItemInserted(0);
+                    mRvTweets.scrollToPosition(0);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
 
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                Log.d("Submit Tweet Array: ", String.valueOf(statusCode));
+                super.onSuccess(statusCode, headers, response);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
+            }
+        }, text);
     }
 
     @Override
@@ -64,7 +102,8 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
 
     private void launchComposeActivity() {
         FragmentManager fm = getSupportFragmentManager();
-        ComposeFragment composeFragment = ComposeFragment.newInstance();
+
+        ComposeFragment composeFragment = ComposeFragment.newInstance(currentUser.getProfileImageUrl());
         composeFragment.show(fm, "compose");
     }
 
@@ -76,6 +115,10 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
 
         mClient = TwitterApp.getRestClient();
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
         setupRecyclerView();
 
         mConnectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -83,6 +126,8 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         populateTimeline();
 
         setupScrollListener();
+
+        getUserInfo();
     }
 
     private void setupRecyclerView() {
@@ -185,5 +230,39 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         };
 
         mRvTweets.addOnScrollListener(mScrollListener);
+    }
+
+    public void getUserInfo() {
+        mClient.getCurrentUser(new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    currentUser = User.fromJSON(response);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                super.onSuccess(statusCode, headers, response);
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                super.onSuccess(statusCode, headers, response);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
+            }
+        });
     }
 }

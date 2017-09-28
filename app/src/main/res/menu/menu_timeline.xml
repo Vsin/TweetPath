@@ -1,10 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.phivle.nytimessearch.activities.TimelineActivity" >
+    tools:context="com.phivle.nytimessearch.activities.TimelineActivity"
+    android:background="@color/white">
+
     <item android:id="@+id/action_compose"
         android:title="@string/compose"
-        android:icon="@drawable/ic_create_black_24dp"
+        android:icon="@drawable/ic_create_24dp"
         android:orderInCategory="200"
         app:showAsAction="ifRoom" />
 </menu>
