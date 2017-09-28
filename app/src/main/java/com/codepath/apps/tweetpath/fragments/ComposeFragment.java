@@ -23,10 +23,6 @@ public class ComposeFragment extends DialogFragment {
     private String profileImageUrl;
     private ImageView mProfileImageView;
 
-    public interface OnTweetSubmitListener {
-        void submitTweet(String text);
-    }
-
     public ComposeFragment() {
         // Required empty public constructor
     }
@@ -97,6 +93,10 @@ public class ComposeFragment extends DialogFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public interface OnTweetSubmitListener {
+        void submitTweet(String text);
     }
 
 }

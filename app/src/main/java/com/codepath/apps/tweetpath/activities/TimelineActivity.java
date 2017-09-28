@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.codepath.apps.tweetpath.R;
 import com.codepath.apps.tweetpath.TwitterApp;
@@ -35,7 +36,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class TimelineActivity extends AppCompatActivity implements ComposeFragment.OnTweetSubmitListener {
 
-    LinearLayoutManager mLinearLayoutManager;
+    private LinearLayoutManager mLinearLayoutManager;
     private TwitterClient mClient;
     private TweetAdapter mTweetAdapter;
     private List<Tweet> mTweets;
@@ -45,42 +46,48 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
 
     @Override
     public void submitTweet(String text) {
-        mClient.postTweet(new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Tweet tweet;
-                Log.d("Submit Tweet Object: ", String.valueOf(statusCode));
-                try {
-                    tweet = Tweet.fromJSON(response);
-                    mTweets.add(0, tweet);
-                    mTweetAdapter.notifyItemInserted(0);
-                    mRvTweets.scrollToPosition(0);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+
+        NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        if (isConnected) {
+            mClient.postTweet(new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    Tweet tweet;
+                    Log.d("Submit Tweet Object: ", String.valueOf(statusCode));
+                    try {
+                        tweet = Tweet.fromJSON(response);
+                        mTweets.add(0, tweet);
+                        mTweetAdapter.notifyItemInserted(0);
+                        mRvTweets.scrollToPosition(0);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                Log.d("Submit Tweet Array: ", String.valueOf(statusCode));
-                super.onSuccess(statusCode, headers, response);
-            }
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                    Log.d("Submit Tweet Array: ", String.valueOf(statusCode));
+                    super.onSuccess(statusCode, headers, response);
+                }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-            }
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    super.onFailure(statusCode, headers, throwable, errorResponse);
+                }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-            }
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                    super.onFailure(statusCode, headers, throwable, errorResponse);
+                }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-            }
-        }, text);
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                    super.onFailure(statusCode, headers, responseString, throwable);
+                }
+            }, text);
+        }
     }
 
     @Override
@@ -123,11 +130,20 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
 
         mConnectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        populateTimeline();
+        NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        if (isConnected) {
+            populateTimeline();
+            getUserInfo();
+        } else {
+            Toast.makeText(this, "No internet connectivity.", Toast.LENGTH_LONG).show();
+        }
 
         setupScrollListener();
 
-        getUserInfo();
+
     }
 
     private void setupRecyclerView() {
@@ -142,97 +158,96 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
     }
 
     private void populateTimeline() {
+        mClient.getHomeTimeline(new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            }
 
-        NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 
-        if (isConnected) {
-            mClient.getHomeTimeline(new JsonHttpResponseHandler() {
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                }
-
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-
-                    for (int i = 0; i < response.length(); ++i) {
-                        Tweet tweet;
-                        try {
-                            tweet = Tweet.fromJSON(response.getJSONObject(i));
-                            mTweets.add(tweet);
-                            mTweetAdapter.notifyItemInserted(mTweets.size() - 1);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                for (int i = 0; i < response.length(); ++i) {
+                    Tweet tweet;
+                    try {
+                        tweet = Tweet.fromJSON(response.getJSONObject(i));
+                        mTweets.add(tweet);
+                        mTweetAdapter.notifyItemInserted(mTweets.size() - 1);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                    throwable.printStackTrace();
-                }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                throwable.printStackTrace();
+            }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                    throwable.printStackTrace();
-                }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                throwable.printStackTrace();
+            }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                    throwable.printStackTrace();
-                }
-            });
-        }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                throwable.printStackTrace();
+            }
+        });
     }
 
     private void setupScrollListener() {
         EndlessRecyclerViewScrollListener mScrollListener = new EndlessRecyclerViewScrollListener(mLinearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                mClient.getMoreHomeTimeline(new JsonHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                        super.onSuccess(statusCode, headers, response);
-                    }
 
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+                boolean isConnected = activeNetwork != null &&
+                        activeNetwork.isConnectedOrConnecting();
+                if (isConnected) {
+                    mClient.getMoreHomeTimeline(new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            super.onSuccess(statusCode, headers, response);
+                        }
 
-                        for (int i = 0; i < response.length(); ++i) {
-                            Tweet tweet;
-                            try {
-                                tweet = Tweet.fromJSON(response.getJSONObject(i));
-                                mTweets.add(tweet);
-                                mTweetAdapter.notifyItemInserted(mTweets.size() - 1);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+
+                            for (int i = 0; i < response.length(); ++i) {
+                                Tweet tweet;
+                                try {
+                                    tweet = Tweet.fromJSON(response.getJSONObject(i));
+                                    mTweets.add(tweet);
+                                    mTweetAdapter.notifyItemInserted(mTweets.size() - 1);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                        super.onFailure(statusCode, headers, throwable, errorResponse);
-                    }
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                            super.onFailure(statusCode, headers, throwable, errorResponse);
+                        }
 
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                        super.onFailure(statusCode, headers, throwable, errorResponse);
-                    }
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                            super.onFailure(statusCode, headers, throwable, errorResponse);
+                        }
 
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                        super.onFailure(statusCode, headers, responseString, throwable);
-                    }
-                }, Collections.min(mTweets).getID());
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                            super.onFailure(statusCode, headers, responseString, throwable);
+                        }
+                    }, Collections.min(mTweets).getID());
+                }
             }
         };
 
         mRvTweets.addOnScrollListener(mScrollListener);
     }
 
-    public void getUserInfo() {
+    private void getUserInfo() {
         mClient.getCurrentUser(new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

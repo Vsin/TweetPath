@@ -3,19 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    tools:context="com.codepath.apps.tweetpath.fragments.ComposeFragment"
-    android:background="@color/white">
+    android:background="@color/white"
+    tools:context="com.codepath.apps.tweetpath.fragments.ComposeFragment">
 
     <ImageView
         android:id="@+id/ivProfileIcon"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:srcCompat="@drawable/ic_launcher"
-        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
         android:layout_margin="5dp"
+        android:contentDescription="@string/profile_icon"
         android:scaleType="centerCrop"
-        android:contentDescription="@string/profile_icon" />
+        app:srcCompat="@drawable/ic_launcher" />
 
     <ImageButton
         android:id="@+id/ibCancel"

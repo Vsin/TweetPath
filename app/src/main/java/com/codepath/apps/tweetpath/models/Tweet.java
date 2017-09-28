@@ -41,8 +41,7 @@ public class Tweet implements Comparator<Tweet>, Comparable<Tweet> {
             return 1;
         } else if (tweet.mID < t1.mID) {
             return -1;
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -53,8 +52,7 @@ public class Tweet implements Comparator<Tweet>, Comparable<Tweet> {
             return 1;
         } else if (this.mID < tweet.mID) {
             return -1;
-        }
-        else {
+        } else {
             return 0;
         }
     }
