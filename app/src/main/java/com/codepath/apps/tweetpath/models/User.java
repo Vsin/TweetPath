@@ -9,27 +9,29 @@ import org.json.JSONObject;
 
 public class User {
 
-    private String name;
+    private String mName;
     private long uid;
-    private String screenName;
-    private String profileImageUrl;
+    private String mScreenName;
+    private String mProfileImageUrl;
 
     public static User fromJSON(JSONObject jsonObject) throws JSONException {
         User user = new User();
 
-        user.name = jsonObject.getString("name");
+        user.mName = jsonObject.getString("name");
         user.uid = jsonObject.getLong("id");
-        user.screenName = jsonObject.getString("screen_name");
-        user.profileImageUrl = jsonObject.getString("profile_image_url");
+        user.mScreenName = jsonObject.getString("screen_name");
+        user.mProfileImageUrl = jsonObject.getString("profile_image_url");
 
         return user;
     }
 
     public String getName() {
-        return name;
+        return mName;
     }
 
     public String getProfileImageUrl() {
-        return profileImageUrl;
+        return mProfileImageUrl;
     }
+
+    public String getScreenNameForDisplay() { return "@" + mScreenName; }
 }

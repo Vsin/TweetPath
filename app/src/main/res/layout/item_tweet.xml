@@ -15,18 +15,27 @@
         app:srcCompat="@android:color/black" />
 
     <TextView
-        android:id="@+id/tvUsername"
+        android:id="@+id/tvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignStart="@+id/tvBody" />
 
     <TextView
+        android:id="@+id/tvScreenName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/tvName"
+        android:layout_marginStart="5dp"
+        />
+
+    <TextView
         android:id="@+id/tvBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/ivProfileImage"
-        android:layout_below="@+id/tvUsername"
+        android:layout_below="@+id/tvName"
         android:layout_marginStart="5dp"
         android:layout_toEndOf="@+id/ivProfileImage" />
 
