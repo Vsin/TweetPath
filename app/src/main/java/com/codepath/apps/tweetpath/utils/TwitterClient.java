@@ -28,6 +28,7 @@ public class TwitterClient extends OAuthBaseClient {
     private static final String REST_CONSUMER_KEY = "cl9Zlbjx8SHVPxRSYEUq8IONa";       // Change this
     private static final String REST_CONSUMER_SECRET = "kEoei7eOUvLOJ6J2V4EFgqnz4HgMsT17GVksH61vuQIfk0fZRK"; // Change this
     private static final String HOME_TIMELINE_URN = "statuses/home_timeline.json";
+    private static final String MENTIONS_TIMELINE_URN = "statuses/mentions_timeline.json";
     private static final String POST_STATUSES_URN = "statuses/update.json";
     private static final String ACCOUNT_VERIFY_CREDENTIALS_URN = "account/verify_credentials.json";
 
@@ -61,6 +62,15 @@ public class TwitterClient extends OAuthBaseClient {
         RequestParams params = new RequestParams();
         params.put("count_id", 25);
         params.put("max_id", maxId);
+        client.get(apiUrl, params, handler);
+    }
+
+    public void getMentionsTimeline(AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl(MENTIONS_TIMELINE_URN);
+        // Can specify query string params directly or through RequestParams.
+        RequestParams params = new RequestParams();
+        params.put("count_id", 25);
+        params.put("since_id", 1);
         client.get(apiUrl, params, handler);
     }
 
