@@ -7,6 +7,7 @@ import com.codepath.oauth.OAuthBaseClient;
 import com.github.scribejava.apis.TwitterApi;
 import com.github.scribejava.core.builder.api.BaseApi;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 /*
@@ -28,7 +29,9 @@ public class TwitterClient extends OAuthBaseClient {
     private static final String REST_CONSUMER_KEY = "cl9Zlbjx8SHVPxRSYEUq8IONa";       // Change this
     private static final String REST_CONSUMER_SECRET = "kEoei7eOUvLOJ6J2V4EFgqnz4HgMsT17GVksH61vuQIfk0fZRK"; // Change this
     private static final String HOME_TIMELINE_URN = "statuses/home_timeline.json";
+    private static final String MENTIONS_TIMELINE_URN = "statuses/mentions_timeline.json";
     private static final String POST_STATUSES_URN = "statuses/update.json";
+    private static final String USER_TIMELINE_URN = "statuses/user_timeline.json";
     private static final String ACCOUNT_VERIFY_CREDENTIALS_URN = "account/verify_credentials.json";
 
     // Landing page to indicate the OAuth flow worked in case Chrome for Android 25+ blocks navigation back to the app.
@@ -55,12 +58,30 @@ public class TwitterClient extends OAuthBaseClient {
         client.get(apiUrl, params, handler);
     }
 
-    public void getMoreHomeTimeline(AsyncHttpResponseHandler handler, long maxId) {
+    public void getHomeTimeline(AsyncHttpResponseHandler handler, long maxId) {
         String apiUrl = getApiUrl(HOME_TIMELINE_URN);
 
         RequestParams params = new RequestParams();
         params.put("count_id", 25);
-        params.put("max_id", maxId);
+        params.put("max_id", maxId - 1);
+        client.get(apiUrl, params, handler);
+    }
+
+    public void getMentionsTimeline(AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl(MENTIONS_TIMELINE_URN);
+        // Can specify query string params directly or through RequestParams.
+        RequestParams params = new RequestParams();
+        params.put("count_id", 25);
+        params.put("since_id", 1);
+        client.get(apiUrl, params, handler);
+    }
+
+    public void getMentionsTimeline(AsyncHttpResponseHandler handler, long maxId) {
+        String apiUrl = getApiUrl(MENTIONS_TIMELINE_URN);
+        // Can specify query string params directly or through RequestParams.
+        RequestParams params = new RequestParams();
+        params.put("count_id", 25);
+        params.put("max_id", maxId - 1);
         client.get(apiUrl, params, handler);
     }
 
@@ -77,4 +98,27 @@ public class TwitterClient extends OAuthBaseClient {
 
         client.get(apiUrl, handler);
     }
+
+    public void getUserTimeline(String screenName, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl(USER_TIMELINE_URN);
+        // Can specify query string params directly or through RequestParams.
+        RequestParams params = new RequestParams();
+        params.put("screen_name", screenName);
+        params.put("count_id", 25);
+        params.put("since_id", 1);
+        client.get(apiUrl, params, handler);
+
+    }
+
+    public void getUserTimeline(String screenName, AsyncHttpResponseHandler handler, long maxId) {
+        String apiUrl = getApiUrl(USER_TIMELINE_URN);
+        // Can specify query string params directly or through RequestParams.
+        RequestParams params = new RequestParams();
+        params.put("screen_name", screenName);
+        params.put("count_id", 25);
+        params.put("max_id", maxId - 1);
+        client.get(apiUrl, params, handler);
+
+    }
+
 }
