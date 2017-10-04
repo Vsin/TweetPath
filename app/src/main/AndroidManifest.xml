@@ -36,7 +36,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.TimelineActivity" />
-        <activity android:name=".activities.ProfileActivity"></activity>
+        <activity android:name=".activities.ProfileActivity" />
     </application>
 
 </manifest>

@@ -4,21 +4,15 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import com.codepath.apps.tweetpath.TwitterApp;
-import com.codepath.apps.tweetpath.models.Tweet;
 import com.codepath.apps.tweetpath.utils.TwitterClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collections;
 
 import cz.msebera.android.httpclient.Header;
-
-/**
- * Created by Vsin on 10/1/17.
- */
 
 public class MentionsTimelineFragment extends TweetsListFragment {
     private TwitterClient mClient;

@@ -3,25 +3,19 @@ package com.codepath.apps.tweetpath.adapters;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.PagerAdapter;
 
-import com.codepath.apps.tweetpath.activities.TimelineActivity;
 import com.codepath.apps.tweetpath.fragments.HomeTimelineFragment;
 import com.codepath.apps.tweetpath.fragments.MentionsTimelineFragment;
 
-/**
- * Created by Vsin on 10/2/17.
- */
+public class TweetListFragmentPagerAdapter extends SmartFragmentStatePagerAdapter {
 
-public class TweetListFragmentPagerAdapter extends FragmentPagerAdapter {
+    private static final int NUM_ITEMS = 2;
+    private final String tabTitles[] = new String[] {"Home", "Mentions"};
+    private enum FRAGMENT { HomeTimeline, MentionsTimeline }
 
-    private String tabTitles[] = new String[] {"Home", "Mentions"};
-    private Context mContext;
 
     public TweetListFragmentPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
-        this.mContext = context;
     }
 
     @Override
@@ -31,13 +25,13 @@ public class TweetListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        if (position == 0) return new HomeTimelineFragment();
-        if (position == 1) return new MentionsTimelineFragment();
+        if (position == FRAGMENT.HomeTimeline.ordinal()) return new HomeTimelineFragment();
+        if (position == FRAGMENT.MentionsTimeline.ordinal()) return new MentionsTimelineFragment();
         return null;
     }
 
     @Override
     public int getCount() {
-        return 2;
+        return NUM_ITEMS;
     }
 }

@@ -13,24 +13,22 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.codepath.apps.tweetpath.R;
+import com.codepath.apps.tweetpath.models.User;
 
 public class ComposeFragment extends DialogFragment {
 
     private OnTweetSubmitListener mListener;
     private EditText mComposeEditText;
-    private Button mTweetButton;
-    private ImageButton mCancelButton;
     private String profileImageUrl;
-    private ImageView mProfileImageView;
 
     public ComposeFragment() {
         // Required empty public constructor
     }
 
-    public static ComposeFragment newInstance(String profileImageUrl) {
+    public static ComposeFragment newInstance(User user) {
         ComposeFragment fragment = new ComposeFragment();
         Bundle args = new Bundle();
-        args.putString("profileImageUrl", profileImageUrl);
+        args.putString("profileImageUrl", user.getProfileImageUrl());
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,6 +50,10 @@ public class ComposeFragment extends DialogFragment {
     }
 
     private void setupViews(View view) {
+        Button mTweetButton;
+        ImageButton mCancelButton;
+        ImageView mProfileImageView;
+
         mComposeEditText = view.findViewById(R.id.etCompose);
         mCancelButton = view.findViewById(R.id.ibCancel);
         mCancelButton.setOnClickListener(new View.OnClickListener() {
@@ -73,7 +75,7 @@ public class ComposeFragment extends DialogFragment {
 
     private void onTweetButtonClick() {
         if (mListener != null) {
-            mListener.submitTweet(mComposeEditText.getText().toString());
+            mListener.onSubmitTweet(mComposeEditText.getText().toString());
         }
         dismiss();
     }
@@ -96,7 +98,7 @@ public class ComposeFragment extends DialogFragment {
     }
 
     public interface OnTweetSubmitListener {
-        void submitTweet(String text);
+        void onSubmitTweet(String text);
     }
 
 }

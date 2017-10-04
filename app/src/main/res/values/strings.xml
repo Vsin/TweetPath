@@ -18,5 +18,10 @@
     <string name="placeholder_name">Name</string>
     <string name="placeholder_followers">5 Followers</string>
     <string name="placeholder_following">10 Following</string>
+    <string name="testuser">\@testuser</string>
+    <string name="placeholder_tweet_body">This is a tweet!</string>
+    <string name="placeholder_timestamp">5m ago</string>
+    <string name="placeholder_tagline">This is a long tagline about myself!</string>
+    <string name="no_internet_connectivity">No internet connectivity.</string>
 
 </resources>

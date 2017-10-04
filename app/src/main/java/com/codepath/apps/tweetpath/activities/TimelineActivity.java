@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -19,61 +18,26 @@ import com.codepath.apps.tweetpath.R;
 import com.codepath.apps.tweetpath.TwitterApp;
 import com.codepath.apps.tweetpath.adapters.TweetListFragmentPagerAdapter;
 import com.codepath.apps.tweetpath.fragments.ComposeFragment;
+import com.codepath.apps.tweetpath.fragments.HomeTimelineFragment;
 import com.codepath.apps.tweetpath.fragments.TweetsListFragment;
+import com.codepath.apps.tweetpath.models.Tweet;
 import com.codepath.apps.tweetpath.models.User;
 import com.codepath.apps.tweetpath.utils.TwitterClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import cz.msebera.android.httpclient.Header;
 
-public class TimelineActivity extends AppCompatActivity implements ComposeFragment.OnTweetSubmitListener {
+public class TimelineActivity extends AppCompatActivity
+        implements ComposeFragment.OnTweetSubmitListener,
+        TweetsListFragment.TweetSelectedListener {
 
     private ConnectivityManager mConnectivityManager;
     private User currentUser;
-    private TweetsListFragment mFragmentHomeTimeline;
-    private TweetsListFragment mFragmentMentionsTimeline;
     private TwitterClient mClient;
-
-    @Override
-    public void submitTweet(String text) {
-
-        NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-        if (isConnected) {
-            mClient.postTweet(new JsonHttpResponseHandler() {
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    mFragmentHomeTimeline.submitTweet(response);
-                }
-
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                    Log.d("Submit Tweet Array: ", String.valueOf(statusCode));
-                    super.onSuccess(statusCode, headers, response);
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                    super.onFailure(statusCode, headers, throwable, errorResponse);
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                    super.onFailure(statusCode, headers, throwable, errorResponse);
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                    super.onFailure(statusCode, headers, responseString, throwable);
-                }
-            }, text);
-        }
-    }
+    private TweetListFragmentPagerAdapter mTweetListFragmentPagerAdapter;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -90,22 +54,21 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         }
 
         if (id == R.id.action_profile) {
-            launchProfileActivity();
+            launchProfileActivity(currentUser);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void launchProfileActivity() {
+    private void launchProfileActivity(User user) {
         Intent launchProfile = new Intent(this, ProfileActivity.class);
-        launchProfile.putExtra("user", currentUser);
+        launchProfile.putExtra("user", user);
         startActivity(launchProfile);
-
     }
 
     private void launchComposeActivity() {
         FragmentManager fm = getSupportFragmentManager();
 
-        ComposeFragment composeFragment = ComposeFragment.newInstance(currentUser.getProfileImageUrl());
+        ComposeFragment composeFragment = ComposeFragment.newInstance(currentUser);
         composeFragment.show(fm, "compose");
     }
 
@@ -115,66 +78,64 @@ public class TimelineActivity extends AppCompatActivity implements ComposeFragme
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        viewPager.setAdapter(new TweetListFragmentPagerAdapter(getSupportFragmentManager(), this));
+        mTweetListFragmentPagerAdapter = new TweetListFragmentPagerAdapter(getSupportFragmentManager(), this);
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mViewPager.setAdapter(mTweetListFragmentPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setupWithViewPager(mViewPager);
 
         mClient = TwitterApp.getRestClient();
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-
         setSupportActionBar(toolbar);
 
-//        mFragmentHomeTimeline = (TweetsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_timeline);
-//        mFragmentMentionsTimeline = (TweetsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_timeline);
+        getUserInfo();
 
+    }
+
+    private void getUserInfo() {
         mConnectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
-
         if (isConnected) {
-            getUserInfo();
+            mClient.getCurrentUser(new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    try {
+                        currentUser = User.fromJSON(response);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    super.onSuccess(statusCode, headers, response);
+                }
+            });
         } else {
-            Toast.makeText(this, "No internet connectivity.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.no_internet_connectivity, Toast.LENGTH_LONG).show();
         }
-
     }
 
-    private void getUserInfo() {
-        mClient.getCurrentUser(new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    currentUser = User.fromJSON(response);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+    @Override
+    public void onSubmitTweet(String text) {
+
+        NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        if (isConnected) {
+            mClient.postTweet(new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    HomeTimelineFragment homeTimelineFragment =
+                            (HomeTimelineFragment) mTweetListFragmentPagerAdapter.getRegisteredFragment(0);
+                    homeTimelineFragment.prependTweet(response);
                 }
-                super.onSuccess(statusCode, headers, response);
-            }
+            }, text);
+        }
+    }
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                super.onSuccess(statusCode, headers, response);
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-            }
-        });
+    @Override
+    public void onTweetSelected(Tweet tweet) {
+        launchProfileActivity(tweet.getUser());
     }
 }

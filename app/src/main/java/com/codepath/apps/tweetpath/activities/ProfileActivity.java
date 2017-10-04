@@ -11,6 +11,8 @@ import com.codepath.apps.tweetpath.R;
 import com.codepath.apps.tweetpath.fragments.UserTimelineFragment;
 import com.codepath.apps.tweetpath.models.User;
 
+import java.util.Locale;
+
 public class ProfileActivity extends AppCompatActivity {
 
     private User mUser;
@@ -47,8 +49,8 @@ public class ProfileActivity extends AppCompatActivity {
         ImageView ivProfileImage = (ImageView) findViewById(R.id.ivProfileImage);
         tvName.setText(mUser.getName());
         tvTagline.setText(mUser.getTagline());
-        tvFollowers.setText(mUser.getFollowersCount() + " Followers");
-        tvFollowing.setText(mUser.getFollowingCount() + " Following");
+        tvFollowers.setText(String.format(Locale.US, "%d Followers", mUser.getFollowersCount()));
+        tvFollowing.setText(String.format(Locale.US, "%d Following", mUser.getFollowingCount()));
         Glide.with(this).load(mUser.getProfileImageUrl()).into(ivProfileImage);
     }
 }

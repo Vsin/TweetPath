@@ -30,13 +30,13 @@ import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
-/**
- * Created by Vsin on 10/1/17.
- */
+public class TweetsListFragment extends Fragment implements TweetAdapter.TweetAdapterListener {
 
-public class TweetsListFragment extends Fragment {
+    public interface TweetSelectedListener {
+        void onTweetSelected(Tweet tweet);
+    }
 
-    TweetAdapter mTweetAdapter;
+    private TweetAdapter mTweetAdapter;
     List<Tweet> mTweets;
     private RecyclerView mRvTweets;
     private LinearLayoutManager mLinearLayoutManager;
@@ -59,13 +59,13 @@ public class TweetsListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    public void initiateTimeline() {
+    void initiateTimeline() {
     }
 
     private void setupRecyclerView(View v) {
 
         mTweets = new ArrayList<>();
-        mTweetAdapter = new TweetAdapter(mTweets);
+        mTweetAdapter = new TweetAdapter(mTweets, this);
         mLinearLayoutManager = new LinearLayoutManager(getContext());
 
         mRvTweets = v.findViewById(R.id.rvTweet);
@@ -73,7 +73,7 @@ public class TweetsListFragment extends Fragment {
         mRvTweets.setLayoutManager(mLinearLayoutManager);
     }
 
-    public void populateTimeline(JSONArray response) {
+    void populateTimeline(JSONArray response) {
         for (int i = 0; i < response.length(); ++i) {
             Tweet tweet;
             try {
@@ -86,7 +86,7 @@ public class TweetsListFragment extends Fragment {
         }
     }
 
-    public void setupScrollListener() {
+    private void setupScrollListener() {
         EndlessRecyclerViewScrollListener mScrollListener = new EndlessRecyclerViewScrollListener(mLinearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -99,28 +99,8 @@ public class TweetsListFragment extends Fragment {
                     TwitterClient client = TwitterApp.getRestClient();
                     client.getHomeTimeline(new JsonHttpResponseHandler() {
                         @Override
-                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                            super.onSuccess(statusCode, headers, response);
-                        }
-
-                        @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                             populateMoreTimeline();
-                        }
-
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                            super.onFailure(statusCode, headers, throwable, errorResponse);
-                        }
-
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                            super.onFailure(statusCode, headers, throwable, errorResponse);
-                        }
-
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                            super.onFailure(statusCode, headers, responseString, throwable);
                         }
                     }, Collections.min(mTweets).getID());
                 }
@@ -130,11 +110,11 @@ public class TweetsListFragment extends Fragment {
         mRvTweets.addOnScrollListener(mScrollListener);
     }
 
-    public void populateMoreTimeline() {
+    void populateMoreTimeline() {
 
     }
 
-    public void submitTweet(JSONObject response) {
+    public void prependTweet(JSONObject response) {
         Tweet tweet;
         try {
             tweet = Tweet.fromJSON(response);
@@ -144,5 +124,12 @@ public class TweetsListFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onItemSelected(View view, int position) {
+        Tweet tweet = mTweets.get(position);
+        ((TweetSelectedListener) getActivity()).onTweetSelected(tweet);
+
     }
 }

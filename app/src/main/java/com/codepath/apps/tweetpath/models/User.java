@@ -6,10 +6,6 @@ import android.os.Parcelable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by Vsin on 9/25/17.
- */
-
 public class User implements Parcelable {
 
     private String mName;
